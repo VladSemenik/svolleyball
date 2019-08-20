@@ -8,7 +8,15 @@ const games = [];
 
 router.get('/create/:name', async (req, res, next) => {
 
-  const session = await io.of(`/${req.params.name}`);
+  let session;
+
+  if(await games.find(e => e.name === '/' + req.params.name)){
+    session = await games.find(e => e.name === '/' + req.params.name);
+  } else {
+    session = await io.of(`/${req.params.name}`);
+    await games.push(session);
+  }
+
 
   await session.on('connection', async function(socket){
     await socket.on('ball point', async (e) => {
@@ -20,14 +28,16 @@ router.get('/create/:name', async (req, res, next) => {
     })
   });
 
-  console.log(req.params.name);
+  console.log(games);
 
-  if (await games.includes(req.params.name)) {
-    res.json({ createdStatus: 'already' });
-  } else {
-    games.push(req.params.name);
-    res.json({ createdStatus: 'created', game: req.params.name });
-  }
+    if(Object.keys(games.find(e => e.name === '/' + req.params.name).connected).length > 0){
+      if(Object.keys(games.find(e => e.name === '/' + req.params.name).connected).length > 1)
+        res.json({ createdStatus: 'full lobby', game: req.params.name });
+      else
+        res.json({ createdStatus: 'connected', game: req.params.name });
+    }
+    else
+      res.json({ createdStatus: 'created', game: req.params.name });
 
 });
 
