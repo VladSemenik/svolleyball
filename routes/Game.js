@@ -41,8 +41,8 @@ router.get('/create/:name', async (req, res, next) => {
 
 });
 
-http.listen(3031, function(){
-  console.log('web socket server listening on *:3031');
+http.listen(3031, '172.20.1.30', function(){
+  console.log('web socket server listening on 172.20.1.30:3031');
 });
 
 module.exports = router;
