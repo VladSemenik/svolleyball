@@ -10,6 +10,7 @@ router.get('/create/:name', async (req, res, next) => {
 
   let session;
 
+
   if(await games.find(e => e.name === '/' + req.params.name)){
     session = await games.find(e => e.name === '/' + req.params.name);
   } else {
@@ -17,6 +18,11 @@ router.get('/create/:name', async (req, res, next) => {
     await games.push(session);
   }
 
+  session = Object.assign(session, {
+    score: {
+      left: 0,
+      right: 0,
+    }});
 
   await session.on('connection', async function(socket){
     await socket.on('ball point', async (e) => {
@@ -25,7 +31,18 @@ router.get('/create/:name', async (req, res, next) => {
 
     await socket.on('enemy point', async (e) => {
       await session.emit('enemy point', e);
-    })
+    });
+
+    await socket.on('score', async (e) => {
+      e = JSON.parse(e);
+      if (e.left) {
+        session.score.left++;
+      }
+      if (e.right){
+        session.score.right++;
+      }
+      await session.emit('score', JSON.stringify(session.score));
+    });
   });
 
   console.log(games);
