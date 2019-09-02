@@ -36,10 +36,10 @@ router.get('/create/:name', async (req, res, next) => {
     await socket.on('score', async (e) => {
       e = JSON.parse(e);
       if (e.left) {
-        session.score.left++;
+        session.score.right++;
       }
       if (e.right){
-        session.score.right++;
+        session.score.left++;
       }
       await session.emit('score', JSON.stringify(session.score));
     });
